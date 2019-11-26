@@ -34,7 +34,7 @@ class Maze:
 
     # Reward values
     STEP_REWARD = -1
-    GOAL_REWARD = 0
+    GOAL_REWARD = 60
     IMPOSSIBLE_REWARD = -100
 
 
@@ -43,13 +43,16 @@ class Maze:
         """
         self.maze                     = maze;
         self.actions                  = self.__actions();
+        self.actionsM                 = self.__actionsM();
         self.states, self.statesM, 
         self.map, self.mapM           = self.__states();        
         self.n_actions                = len(self.actions);
+        self.n_actionsM               = len(self.actions);
         self.n_states                 = len(self.states);
         self.n_statesM                = len(self.statesM);
         self.transition_probabilities = self.__transitions();
         self.rewards                  = self.__rewards(weights=weights,
+                 
                                                 random_rewards=random_rewards);
 
     def __actions(self):
@@ -57,9 +60,22 @@ class Maze:
         actions[self.STAY]       = (0, 0);
         actions[self.MOVE_LEFT]  = (0,-1);
         actions[self.MOVE_RIGHT] = (0, 1);
+        actions[self0.MOVE_UP]    = (-1,0);
+        actions[self.MOVE_DOWN]  = (1,0);
+        return actions;
+
+
+
+     def __actionsM(self):
+        actions = dict();
+        #actions[self.STAY]       = (0, 0);
+        actions[self.MOVE_LEFT]  = (0,-1);
+        actions[self.MOVE_RIGHT] = (0, 1);
         actions[self.MOVE_UP]    = (-1,0);
         actions[self.MOVE_DOWN]  = (1,0);
         return actions;
+
+
 
     def __states(self):
         states = dict();
@@ -79,6 +95,8 @@ class Maze:
                 mapM[(i,j)] = s;
                 sM += 1;
         return states, statesM, map, mapM
+
+
 
     def __move(self, state, action):
         """ Makes a step in the maze, given a current position and an action.
@@ -102,6 +120,27 @@ class Maze:
 
     
 
+
+    def __moveM(self, state):
+ 
+        valid_moves = []
+
+        for a in range(self.actionsM):
+            row = self.statesM[state][0] + self.actionsM[a][0];
+            col = self.statesM[state][1] + self.actionsM[a][1];
+            # Is the future position an impossible one ?
+            hitting_maze_walls =  (row == -1) or (row == self.maze.shape[0]) or \
+                                (col == -1) or (col == self.maze.shape[1])
+            if not hitting_maze_walls:   
+                valid_moves.append(tuple((row, col)))
+
+        picked = np.random.choise(valid_moves)
+  
+        return self.mapM[picked], valid_moves 
+
+
+    
+
     def __transitions(self):
         """ Computes the transition probabilities for every state action pair.
             :return numpy.tensor transition probabilities: tensor of transition
@@ -120,37 +159,6 @@ class Maze:
         return transition_probabilities;
 
 
-
-    def __move(self, state, action):
-
-        # Compute the future position given current (state, action)
-        row = self.statesM[state][0] + self.actionsM[action][0];
-        col = self.statesM[state][1] + self.actionsM[action][1];
-        # Is the future position an impossible one ?
-        hitting_maze_walls =  (row == -1) or (row == self.maze.shape[0]) or \
-                              (col == -1) or (col == self.maze.shape[1]) or \
-                              (self.maze[row,col] == 1);
-        # Based on the impossiblity check return the next state.
-
-        # Initialize the transition probailities tensor (S,S,A)
-        dimensions = (self.n_states,self.n_states,self.n_actions);
-        transition_probabilities = np.zeros(dimensions);
-
-        # Compute the transition probabilities. Note that the transitions
-        # are deterministic.
-        for s in range(self.n_states):
-            for a in range(self.n_actions):
-                next_s = self.__move(s,a);
-                transition_probabilities[next_s, s, a] = 1;
-        return transition_probabilities;
-
-
-        if hitting_maze_walls:
-            return state;
-        else:
-            return self.map[(row, col)];
-
-    return moveM;
 
 
 
@@ -192,6 +200,10 @@ class Maze:
                      rewards[s,a] = weights[i][j];
 
         return rewards;
+
+
+
+
 
     def simulate(self, start, policy, method):
         if method not in methods:
@@ -241,6 +253,9 @@ class Maze:
         return path
 
 
+
+
+
     def show(self):
         print('The states are :')
         print(self.states)
@@ -256,33 +271,49 @@ class Maze:
 
 
 
-def get_policy(env, horizon):
+def get_policy(env, horizon, startM):
 
-    T         = horizon;
+    T = horizon;
     policy_main = []
+    pathM = []
+    stateM = startM
 
     for t in range(0, T):
-        V, policy= mz.dynamic_programming(env, horizon);
+        
+        stateM, valid_moves =  env.__moveM(stateM)
 
-    policy_main.append(policy[:, t])
+        #update negative rewards around mino
+        #env.rewards
+
+        V, policy = mz.dynamic_programming(env, horizon)
+
+        policy_main.append(policy[:, t])
+
+        
+
+        pathM.append(stateM)
+
+    return policy_main, pathM
 
 
 
 
 
-
-def minotaur_walk(env):
+def minotaur_walk(env, state):
 
     n_states  = env.n_statesM;
 
-    for a in range(n_actions):
-        # Update of the temporary Q values
-        Q[s,a] = r[s,a] + np.dot(p[:,s,a],V[:,t+1])
-
-
-
-
+    action = np.random.choise(n_actions)     
     
+    env.__moveM(state, action)
+
+
+
+    return newPos
+
+
+
+   
 
 
 

@@ -34,19 +34,16 @@ def main():
     #env.show()
 
 
-    
-    # Finite horizon
     horizon = 20
-    # Solve the MDP problem with dynamic programming 
-    V, policy= mz.dynamic_programming(env,horizon);
-
-    #print(policy)
-
-
-    # Simulate the shortest path starting from position A
     method = 'DynProg';
     start  = (0,0);
-    path = env.simulate(start, policy, method);
+    startM = (5, 6);
+
+    policy, pathM = get_policy(env, horizon, startM)
+
+    path = env.simulate(start, policy, method)
+
+    mz.animate_solution(maze, path, pathM)
 
 
 
@@ -54,11 +51,8 @@ def main():
 
 
 
-    # Simulate the minotaur step
-    #start  = (5,6); 
-    pathM = [(3, 4) for i in range(len(path))]
-    print(pathM)
-    mz.animate_solution(maze, path, pathM)
+
+
 
 
 
