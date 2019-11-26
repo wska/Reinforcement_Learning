@@ -248,6 +248,7 @@ def dynamic_programming(env, horizon):
                 Q[s,a] = r[s,a] + np.dot(p[:,s,a],V[:,t+1])
         # Update by taking the maximum Q value w.r.t the action a
         V[:,t] = np.max(Q,1);
+        print(V)
         # The optimal action is the one that maximizes the Q function
         policy[:,t] = np.argmax(Q,1);
     return V, policy;
@@ -393,6 +394,9 @@ def animate_solution(maze, path):
             else:
                 grid.get_celld()[(path[i-1])].set_facecolor(col_map[maze[path[i-1]]])
                 grid.get_celld()[(path[i-1])].get_text().set_text('')
-        display.display(fig)
-        display.clear_output(wait=True)
-        time.sleep(1)
+        display.display(fig)       
+        plt.pause(1)         
+        display.clear_output(wait=True)             
+        
+    plt.show() 
+        
