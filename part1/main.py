@@ -49,13 +49,16 @@ def main():
     path = env.simulate(start, policy, method);
 
 
-    mz.animate_solution(maze, path)
+
     
 
 
 
     # Simulate the minotaur step
-    #start  = (5,6);  
+    #start  = (5,6); 
+    pathM = [(3, 4) for i in range(len(path))]
+    print(pathM)
+    mz.animate_solution(maze, path, pathM)
 
 
 

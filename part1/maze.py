@@ -43,9 +43,11 @@ class Maze:
         """
         self.maze                     = maze;
         self.actions                  = self.__actions();
-        self.states, self.map         = self.__states();
+        self.states, self.statesM, 
+        self.map, self.mapM           = self.__states();        
         self.n_actions                = len(self.actions);
         self.n_states                 = len(self.states);
+        self.n_statesM                = len(self.statesM);
         self.transition_probabilities = self.__transitions();
         self.rewards                  = self.__rewards(weights=weights,
                                                 random_rewards=random_rewards);
@@ -61,16 +63,22 @@ class Maze:
 
     def __states(self):
         states = dict();
-        map = dict();
+        statesM = dict();
+        mapM = dict();
         end = False;
         s = 0;
+        sM = 0;
         for i in range(self.maze.shape[0]):
             for j in range(self.maze.shape[1]):
                 if self.maze[i,j] != 1:
                     states[s] = (i,j);
                     map[(i,j)] = s;
                     s += 1;
-        return states, map
+        for i in range(self.maze.shape[0]):
+            for j in range(self.maze.shape[1]):            
+                mapM[(i,j)] = s;
+                sM += 1;
+        return states, statesM, map, mapM
 
     def __move(self, state, action):
         """ Makes a step in the maze, given a current position and an action.
@@ -91,6 +99,9 @@ class Maze:
         else:
             return self.map[(row, col)];
 
+
+    
+
     def __transitions(self):
         """ Computes the transition probabilities for every state action pair.
             :return numpy.tensor transition probabilities: tensor of transition
@@ -107,6 +118,41 @@ class Maze:
                 next_s = self.__move(s,a);
                 transition_probabilities[next_s, s, a] = 1;
         return transition_probabilities;
+
+
+
+    def __move(self, state, action):
+
+        # Compute the future position given current (state, action)
+        row = self.statesM[state][0] + self.actionsM[action][0];
+        col = self.statesM[state][1] + self.actionsM[action][1];
+        # Is the future position an impossible one ?
+        hitting_maze_walls =  (row == -1) or (row == self.maze.shape[0]) or \
+                              (col == -1) or (col == self.maze.shape[1]) or \
+                              (self.maze[row,col] == 1);
+        # Based on the impossiblity check return the next state.
+
+        # Initialize the transition probailities tensor (S,S,A)
+        dimensions = (self.n_states,self.n_states,self.n_actions);
+        transition_probabilities = np.zeros(dimensions);
+
+        # Compute the transition probabilities. Note that the transitions
+        # are deterministic.
+        for s in range(self.n_states):
+            for a in range(self.n_actions):
+                next_s = self.__move(s,a);
+                transition_probabilities[next_s, s, a] = 1;
+        return transition_probabilities;
+
+
+        if hitting_maze_walls:
+            return state;
+        else:
+            return self.map[(row, col)];
+
+    return moveM;
+
+
 
     def __rewards(self, weights=None, random_rewards=None):
 
@@ -205,6 +251,45 @@ class Maze:
         print('The rewards:')
         print(self.rewards)
 
+
+
+
+
+
+def get_policy(env, horizon):
+
+    T         = horizon;
+    policy_main = []
+
+    for t in range(0, T):
+        V, policy= mz.dynamic_programming(env, horizon);
+
+    policy_main.append(policy[:, t])
+
+
+
+
+
+
+def minotaur_walk(env):
+
+    n_states  = env.n_statesM;
+
+    for a in range(n_actions):
+        # Update of the temporary Q values
+        Q[s,a] = r[s,a] + np.dot(p[:,s,a],V[:,t+1])
+
+
+
+
+    
+
+
+
+
+
+
+
 def dynamic_programming(env, horizon):
     """ Solves the shortest path problem using dynamic programming
         :input Maze env           : The maze environment in which we seek to
@@ -252,6 +337,9 @@ def dynamic_programming(env, horizon):
         # The optimal action is the one that maximizes the Q function
         policy[:,t] = np.argmax(Q,1);
     return V, policy;
+
+
+
 
 def value_iteration(env, gamma, epsilon):
     """ Solves the shortest path problem using value iteration
@@ -346,7 +434,7 @@ def draw_maze(maze):
         cell.set_height(1.0/rows);
         cell.set_width(1.0/cols);
 
-def animate_solution(maze, path):
+def animate_solution(maze, path, pathM):
 
     # Map a color to each cell in the maze
     col_map = {0: WHITE, 1: BLACK, 2: LIGHT_GREEN, -6: LIGHT_RED, -1: LIGHT_RED};
@@ -387,13 +475,20 @@ def animate_solution(maze, path):
     for i in range(len(path)):
         grid.get_celld()[(path[i])].set_facecolor(LIGHT_ORANGE)
         grid.get_celld()[(path[i])].get_text().set_text('Player')
+
+        grid.get_celld()[(pathM[i])].set_facecolor(LIGHT_PURPLE)
+        grid.get_celld()[(pathM[i])].get_text().set_text('Minotaur')
         if i > 0:
-            if path[i] == path[i-1]:
-                grid.get_celld()[(path[i])].set_facecolor(LIGHT_GREEN)
-                grid.get_celld()[(path[i])].get_text().set_text('Player is out')
-            else:
-                grid.get_celld()[(path[i-1])].set_facecolor(col_map[maze[path[i-1]]])
-                grid.get_celld()[(path[i-1])].get_text().set_text('')
+            #if path[i] == path[i-1]:
+            #    grid.get_celld()[(path[i])].set_facecolor(LIGHT_GREEN)
+            #    grid.get_celld()[(path[i])].get_text().set_text('Player is out')
+            #else:
+            grid.get_celld()[(path[i-1])].set_facecolor(col_map[maze[path[i-1]]])
+            grid.get_celld()[(path[i-1])].get_text().set_text('')
+
+            #grid.get_celld()[(path[i-1])].set_facecolor(col_map[maze[path[i-1]]])
+            #grid.get_celld()[(path[i-1])].get_text().set_text('')
+
         display.display(fig)       
         plt.pause(1)         
         display.clear_output(wait=True)             
