@@ -28,11 +28,12 @@ def get_policy_and_pathM(env, horizon, start, startM, weights):
         print('')
         print('')    
 
-        print('t: ', t)    
+        print('t:')
+        print(t)    
         print((row, col))         
-        print((rowM, colM))
+        #print((rowM, colM))
        
-        print(abs(col - colM) + abs(row - rowM))
+        #print(abs(col - colM) + abs(row - rowM))
 
         
         
