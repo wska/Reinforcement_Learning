@@ -1,5 +1,6 @@
 import numpy as np
 import maze as mz
+import maze_functions as mzf
 import pandas as pd
 import matplotlib.pyplot as plt
 import time
@@ -17,14 +18,20 @@ def main():
         [0, 0, 1, 0, 0, 1, 1, 1],
         [0, 0, 1, 0, 0, 1, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 1, 1, 1, 1, 1, 1, 0], 
+        [0, 1, 1, 1, 1, 1, 1, 0],
         [0, 0, 0, 0, 1, 2, 0, 0]
         ])
-    # with the convention 
-    # 0 = empty cell
-    # 1 = obstacle
-    # 2 = exit of the Maze
 
+
+    weights = np.array([
+        [-1, -1,   -100, -1,   -1,   -1,   -1,   -1],
+        [-1, -1,   -100, -1,   -1,   -100, -1,   -1],
+        [-1, -1,   -100, -1,   -1,   -100, -100, -100],
+        [-1, -1,   -100, -1,   -1,   -100, -1,   -1],
+        [-1, -1,   -1,   -1,   -1,   -1,   -1,   -1],
+        [-1, -100, -100, -100, -100, -100, -100, -1],
+        [-1, -1,   -1,   -1,   -100,   60,   -1,   -1],
+        ])
     #mz.draw_maze(maze)
     #plt.show()
 
@@ -39,21 +46,13 @@ def main():
     start  = (0,0);
     startM = (5, 6);
 
-    policy, pathM = get_policy(env, horizon, startM)
+
+
+    policy, pathM = mzf.get_policy_and_pathM(env, horizon, start, startM, weights)
 
     path = env.simulate(start, policy, method)
 
-    mz.animate_solution(maze, path, pathM)
-
-
-
-    
-
-
-
-
-
-
+    mzf.animate_solution(maze, path, pathM)
 
 
 
