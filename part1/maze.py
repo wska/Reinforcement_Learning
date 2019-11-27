@@ -34,7 +34,7 @@ class Maze:
 
     # Reward values
     STEP_REWARD = -1
-    GOAL_REWARD = 60
+    GOAL_REWARD = 1
     IMPOSSIBLE_REWARD = -100
 
 
@@ -205,7 +205,7 @@ class Maze:
 
                      if valid_movesM != None:
                          if (i,j) in minotaurMoves:
-                             rewards[s,a] = -60 / len(valid_movesM)
+                             rewards[s,a] = -100 / len(valid_movesM)
                          else:
                              rewards[s,a] = weights[i][j];
                      else:

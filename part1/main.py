@@ -30,7 +30,7 @@ def main():
         [-1, -1,   -100, -1,   -1,   -100, -1,   -1],
         [-1, -1,   -1,   -1,   -1,   -1,   -1,   -1],
         [-1, -100, -100, -100, -100, -100, -100, -1],
-        [-1, -1,   -1,   -1,   -100,   60,   -1,   -1],
+        [-1, -1,   -1,   -1,   -100,   1,   -1,   -1],
         ])
     #mz.draw_maze(maze)
     #plt.show()
@@ -44,11 +44,13 @@ def main():
     horizon = 20
     method = 'DynProg';
     start  = (0,0);
-    startM = (5, 6);
+    startM = (6, 5);
 
 
 
     policy, pathM = mzf.get_policy_and_pathM(env, horizon, start, startM, weights)
+
+    #print(policy.shape)
 
     path = env.simulate(start, policy, method)
 
