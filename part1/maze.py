@@ -205,7 +205,7 @@ class Maze:
 
                      if valid_movesM != None:
                          if (i,j) in minotaurMoves:
-                             rewards[s,a] = -100 / len(valid_movesM)
+                             rewards[s,a] = -60 / len(valid_movesM)
                          else:
                              rewards[s,a] = weights[i][j];
                      else:
@@ -233,8 +233,7 @@ class Maze:
 
         path = list();
         if method == 'DynProg':
-            # Deduce the horizon from the policy shape
-            print(policy)
+            # Deduce the horizon from the policy shape  
             horizon = policy.shape[1];
             # Initialize current state and time
             t = 0;

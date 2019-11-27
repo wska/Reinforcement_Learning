@@ -5,8 +5,7 @@ import numpy as np
 
 def get_policy_and_pathM(env, horizon, start, startM, weights):
 
-    T = horizon;
-    policy_main = None
+    T = horizon;    
     pathM = []    
 
     #Position of player
@@ -25,44 +24,26 @@ def get_policy_and_pathM(env, horizon, start, startM, weights):
         rowM = env.statesM[stateM_new][0]
         colM = env.statesM[stateM_new][1]
 
-        print('')
-        print('')    
 
-        print('t:')
-        print(t)    
-        print((row, col))         
-        #print((rowM, colM))
-       
-        #print(abs(col - colM) + abs(row - rowM))
-
-        
+        pathM.append(env.statesM[stateM_new])  
         
 
-        
-        stateM_new, valid_movesM =  env.moveM(stateM_new)
+        stateM_new, valid_movesM =  env.moveM(stateM_new) 
 
-
-        #Add negative rewards around minotaur
-        
-
-        if (abs(col - colM) + abs(row - rowM)) == 2:
-            print("check!")
-         
-            #dangerous_player_pos = state_new
-            #V, policy = dynamic_programming(env, horizon, weights, valid_movesM, dangerous_player_pos)
-        #else:
-        V, policy = dynamic_programming(env, horizon, weights)
+        if (abs(col - colM) + abs(row - rowM)) == 2:          
+            dangerous_player_pos = state_new
+            V, policy = dynamic_programming(env, horizon, weights, valid_movesM, dangerous_player_pos)
+        else:
+            V, policy = dynamic_programming(env, horizon, weights)
 
         
         if t == 0:
             policy_main = policy[:,t]
         else:
             policy_main = np.vstack((policy_main, policy[:,t]))
-        
-
-        pathM.append(env.statesM[stateM_new])
 
         state_new = env.move(state_new, policy[state_new,t]);
+
  
     return policy_main.T, pathM
 
@@ -75,7 +56,7 @@ def get_policy_and_pathM(env, horizon, start, startM, weights):
 
 
 
-def dynamic_programming(env, horizon, weights=None, valid_movesM=None, dangerous_player_pos=None):
+def dynamic_programming(env, horizon, weights=None, valid_movesM=None, dangerous_player_pos=None, player_t=None):
     """ Solves the shortest path problem using dynamic programming
         :input Maze env           : The maze environment in which we seek to
                                     find the shortest path.
@@ -103,7 +84,6 @@ def dynamic_programming(env, horizon, weights=None, valid_movesM=None, dangerous
     policy = np.zeros((n_states, T+1));
     Q      = np.zeros((n_states, n_actions));
 
-
     # Initialization
     Q            = np.copy(r);
     V[:, T]      = np.max(Q,1);
@@ -113,8 +93,9 @@ def dynamic_programming(env, horizon, weights=None, valid_movesM=None, dangerous
     for t in range(T-1,-1,-1):
         # Update the value function acccording to the bellman equation
         for s in range(n_states):
-            if dangerous_player_pos == s:
-                env.setRewards(weights, valid_movesM)
+            if dangerous_player_pos != None:
+                if (dangerous_player_pos == s) and (player_t == t):
+                    env.setRewards(weights, valid_movesM)
             else:
                 env.setRewards(weights)
             for a in range(n_actions):
@@ -260,15 +241,8 @@ def animate_solution(maze, path, pathM):
 
 
     # Update the color at each frame
-    for i in range(len(path)):
-        #print(path)
-        #print(pathM)
-        grid.get_celld()[(path[i])].set_facecolor(LIGHT_ORANGE)
-        grid.get_celld()[(path[i])].get_text().set_text('Player')
-        
-        
-        grid.get_celld()[(pathM[i])].set_facecolor(LIGHT_PURPLE)
-        grid.get_celld()[(pathM[i])].get_text().set_text('Minotaur')
+    for i in range(len(path)):       
+
         if i > 0:
             #if path[i] == path[i-1]:
             #    grid.get_celld()[(path[i])].set_facecolor(LIGHT_GREEN)
@@ -282,6 +256,14 @@ def animate_solution(maze, path, pathM):
 
             #grid.get_celld()[(path[i-1])].set_facecolor(col_map[maze[path[i-1]]])
             #grid.get_celld()[(path[i-1])].get_text().set_text('')
+
+        grid.get_celld()[(path[i])].set_facecolor(LIGHT_ORANGE)
+        grid.get_celld()[(path[i])].get_text().set_text('Player')
+        
+        
+        grid.get_celld()[(pathM[i])].set_facecolor(LIGHT_PURPLE)
+        grid.get_celld()[(pathM[i])].get_text().set_text('Minotaur')
+        
 
         display.display(fig)
         plt.pause(1)
