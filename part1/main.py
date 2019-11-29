@@ -27,30 +27,31 @@ def main():
         [-1, -1,   -100, -1,   -1,   -100, -1,   -1],
         [-1, -1,   -1,   -1,   -1,   -1,   -1,   -1],
         [-1, -100, -100, -100, -100, -100, -100, -1],
-        [-1, -1,   -1,   -1,   -100,   60,   -1,   -1],
+        [-1, -1,   -1,   -1,   -100,  1,  -1,   -1],
         ])
 
     env = mz.Maze(maze)
     #env.show()
-    #Initialize for t = 0 which dont work
-    #Complains with     "horizon = policy.shape[1];
-    #                   IndexError: tuple index out of range"
-    
-    dead = 1
-    goal = 0
 
-    horizon = 20
+ 
+    #dead = 0
+    #goal = 0
+    horizon = 22
     method = 'DynProg';
+    start  = (0, 0);
+    startM = (6, 6);
+    #iterations = 20
 
-    start  = (0,0);
-    startM = (6, 5);
+    for _ in range(1):        
+        policy, pathM = mzf.get_policy_and_pathM(env, horizon, start, startM, weights)
+        path = env.simulate(start, policy, method)
+        mzf.animate_solution(maze, path, pathM)        
+            
+    
 
-    iterations = 20
 
-
-    for i in range(2, iterations+1): 
-
-        horizon = i
+"""
+    for i in range(1, iterations+1): 
 
         policy, pathM = mzf.get_policy_and_pathM(env, horizon, start, startM, weights)
 
@@ -67,9 +68,7 @@ def main():
                 dead += 1
 
         #mzf.animate_solution(maze, path, pathM)
-
-    print(dead)
-    print(goal)
+"""
 
 if __name__ == "__main__":
     main()

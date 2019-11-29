@@ -3,9 +3,10 @@ import numpy as np
 
 
 
+
 def get_policy_and_pathM(env, horizon, start, startM, weights):
 
-    T = horizon;    
+    T = horizon    
     pathM = []    
 
     #Position of player
@@ -28,22 +29,28 @@ def get_policy_and_pathM(env, horizon, start, startM, weights):
         pathM.append(env.statesM[stateM_new])  
         
 
-        stateM_new, valid_movesM =  env.moveM(stateM_new) 
+        stateM_new, valid_movesM =  env.moveM(stateM_new)        
+        
 
-        if (abs(col - colM) + abs(row - rowM)) == 2:          
-            dangerous_player_pos = state_new
-            V, policy = dynamic_programming(env, horizon, weights, valid_movesM, dangerous_player_pos)
+        if (abs(col - colM) + abs(row - rowM)) == 2:
+            if t < 15:
+                print('check!')                
+            dangerous_player_pos = state_new       
+            V, policy = dynamic_programming(env, horizon, weights, valid_movesM, dangerous_player_pos, t)            
         else:
             V, policy = dynamic_programming(env, horizon, weights)
 
-        
+        #print(env.rewards)
+
+
         if t == 0:
             policy_main = policy[:,t]
         else:
             policy_main = np.vstack((policy_main, policy[:,t]))
 
-        state_new = env.move(state_new, policy[state_new,t]);
+        state_new = env.move(state_new, policy[state_new,t])
 
+        #print(policy_main.T)
  
     return policy_main.T, pathM
 
@@ -73,39 +80,39 @@ def dynamic_programming(env, horizon, weights=None, valid_movesM=None, dangerous
     # - State space
     # - Action space
     # - The finite horizon
-    p         = env.transition_probabilities;
-    r         = env.rewards;
-    n_states  = env.n_states;
-    n_actions = env.n_actions;
-    T         = horizon;
+    p         = env.transition_probabilities
+    r         = env.rewards
+    n_states  = env.n_states
+    n_actions = env.n_actions
+    T         = horizon    
 
     # The variables involved in the dynamic programming backwards recursions
-    V      = np.zeros((n_states, T+1));
-    policy = np.zeros((n_states, T+1));
-    Q      = np.zeros((n_states, n_actions));
+    V      = np.zeros((n_states, T+1))
+    policy = np.zeros((n_states, T+1))
+    Q      = np.zeros((n_states, n_actions))
 
     # Initialization
-    Q            = np.copy(r);
-    V[:, T]      = np.max(Q,1);
-    policy[:, T] = np.argmax(Q,1);
+    Q            = np.copy(r)
+    V[:, T]      = np.max(Q,1)
+    policy[:, T] = np.argmax(Q,1)    
 
     # The dynamic programming bakwards recursion
     for t in range(T-1,-1,-1):
         # Update the value function acccording to the bellman equation
         for s in range(n_states):
-            if dangerous_player_pos != None:
-                if (dangerous_player_pos == s) and (player_t == t):
-                    env.setRewards(weights, valid_movesM)
+            if (dangerous_player_pos is not None) and (dangerous_player_pos == s) and player_t == t:                
+                env.rewards = env.setRewards(weights, valid_movesM)                
             else:
-                env.setRewards(weights)
+                env.rewards = env.setRewards(weights)              
             for a in range(n_actions):
+                r = env.rewards           
                 # Update of the temporary Q val ues
                 Q[s,a] = r[s,a] + np.dot(p[:,s,a],V[:,t+1])
         # Update by taking the maximum Q value w.r.t the action a
-        V[:,t] = np.max(Q,1);
+        V[:,t] = np.max(Q,1);        
         # The optimal action is the one that maximizes the Q function
-        policy[:,t] = np.argmax(Q,1);
-    return V, policy;
+        policy[:,t] = np.argmax(Q,1)    
+    return V, policy
 
 
 
@@ -265,8 +272,8 @@ def animate_solution(maze, path, pathM):
         grid.get_celld()[(pathM[i])].get_text().set_text('Minotaur')
         
 
-        display.display(fig)
-        plt.pause(1)
+        plt.draw()
+        plt.pause(0.5)
         display.clear_output(wait=True)
 
-    plt.show()
+    plt.show();
