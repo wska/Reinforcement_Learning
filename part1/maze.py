@@ -41,61 +41,59 @@ class Maze:
     def __init__(self, maze, weights=None, random_rewards=False):
         """ Constructor of the environment Maze.
         """
-        self.maze                     = maze;
-        self.actions                  = self.__actions();
-        self.actionsM                 = self.__actionsM();
+        self.maze                     = maze
+        self.actions                  = self.__actions()
+        self.actionsM                 = self.__actionsM()
         self.states, self.statesM, \
-        self.map, self.mapM           = self.__states();
-        self.n_actions                = len(self.actions);
-        self.n_actionsM               = len(self.actions);
-        self.n_states                 = len(self.states);
-        self.n_statesM                = len(self.statesM);
-        self.transition_probabilities = self.__transitions();
-        self.rewards                  = self.setRewards(weights=weights,
-
-                                                random_rewards=random_rewards);
+        self.map, self.mapM           = self.__states()
+        self.n_actions                = len(self.actions)
+        self.n_actionsM               = len(self.actions)
+        self.n_states                 = len(self.states)
+        self.n_statesM                = len(self.statesM)
+        self.transition_probabilities = self.__transitions()
+        self.rewards                  = self.setRewards(weights=weights, random_rewards=random_rewards)
 
     def __actions(self):
-        actions = dict();
-        actions[self.STAY]       = (0, 0);
-        actions[self.MOVE_LEFT]  = (0,-1);
-        actions[self.MOVE_RIGHT] = (0, 1);
-        actions[self.MOVE_UP]    = (-1,0);
-        actions[self.MOVE_DOWN]  = (1,0);
-        return actions;
+        actions = dict()
+        actions[self.STAY]       = (0, 0)
+        actions[self.MOVE_LEFT]  = (0,-1)
+        actions[self.MOVE_RIGHT] = (0, 1)
+        actions[self.MOVE_UP]    = (-1,0)
+        actions[self.MOVE_DOWN]  = (1,0)
+        return actions
 
 
 
     def __actionsM(self):
-        actions = dict();
+        actions = dict()
         #actions[self.STAY]       = (0, 0);
-        actions[self.MOVE_LEFT]  = (0,-1);
-        actions[self.MOVE_RIGHT] = (0, 1);
-        actions[self.MOVE_UP]    = (-1,0);
-        actions[self.MOVE_DOWN]  = (1,0);
-        return actions;
+        actions[self.MOVE_LEFT]  = (0,-1)
+        actions[self.MOVE_RIGHT] = (0, 1)
+        actions[self.MOVE_UP]    = (-1,0)
+        actions[self.MOVE_DOWN]  = (1,0)
+        return actions
 
 
 
     def __states(self):
-        states = dict();
-        statesM = dict();
-        mapM = dict();
-        map = dict();
-        end = False;
-        s = 0;
-        sM = 0;
+        states = dict()
+        statesM = dict()
+        mapM = dict()
+        map = dict()
+        end = False
+        s = 0
+        sM = 0
         for i in range(self.maze.shape[0]):
             for j in range(self.maze.shape[1]):
                 if self.maze[i,j] != 1:
-                    states[s] = (i,j);
-                    map[(i,j)] = s;
-                    s += 1;
+                    states[s] = (i,j)
+                    map[(i,j)] = s
+                    s += 1
         for i in range(self.maze.shape[0]):
             for j in range(self.maze.shape[1]):
-                statesM[sM] = (i,j);
-                mapM[(i,j)] = sM;
-                sM += 1;
+                statesM[sM] = (i,j)
+                mapM[(i,j)] = sM
+                sM += 1
         return states, statesM, map, mapM
 
 
@@ -161,66 +159,59 @@ class Maze:
 
 
 
-    def setRewards(self, weights=None, random_rewards=None, valid_movesM=None):
+    def setRewards(self, weights=None, valid_movesM=None, random_rewards=None):
 
-        rewards = np.zeros((self.n_states, self.n_actions));
+        rewards = np.zeros((self.n_states, self.n_actions))
 
         # If the rewards are not described by a weight matrix
-        if weights is None:
+        if weights is None:         
             for s in range(self.n_states):
                 for a in range(self.n_actions):
-                    next_s = self.move(s,a);
+                    next_s = self.move(s,a)
                     # Rewrd for hitting a wall
                     if s == next_s and a != self.STAY:
-                        rewards[s,a] = self.IMPOSSIBLE_REWARD;
+                        rewards[s,a] = self.IMPOSSIBLE_REWARD
                     # Reward for reaching the exit
                     elif s == next_s and self.maze[self.states[next_s]] == 2:
-                        rewards[s,a] = self.GOAL_REWARD;
+                        rewards[s,a] = self.GOAL_REWARD
                     # Reward for taking a step to an empty cell that is not the exit
                     else:
-                        rewards[s,a] = self.STEP_REWARD;
+                        rewards[s,a] = self.STEP_REWARD
 
                     # If there exists trapped cells with probability 0.5
                     if random_rewards and self.maze[self.states[next_s]]<0:
-                        row, col = self.states[next_s];
+                        row, col = self.states[next_s]
                         # With probability 0.5 the reward is
-                        r1 = (1 + abs(self.maze[row, col])) * rewards[s,a];
+                        r1 = (1 + abs(self.maze[row, col])) * rewards[s,a]
                         # With probability 0.5 the reward is
-                        r2 = rewards[s,a];
+                        r2 = rewards[s,a]
                         # The average reward
-                        rewards[s,a] = 0.5*r1 + 0.5*r2;
+                        rewards[s,a] = 0.5*r1 + 0.5*r2
         # If the weights are descrobed by a weight matrix
-        else:
-
-            if valid_movesM != None:
+        else:            
+            if valid_movesM != None:                           
                 minotaurMoves = []
                 for valid_move in valid_movesM:
-                    minotaurMoves.append(self.statesM[valid_move])
+                    minotaurMoves.append(self.statesM[valid_move])                
 
-            for s in range(self.n_states):
-                 for a in range(self.n_actions):
-                     next_s = self.move(s,a);
-                     i,j = self.states[next_s];
-                     # Simply put the reward as the weights o the next state.
-
-                     if valid_movesM != None:
-                         if (i,j) in minotaurMoves:
-                             rewards[s,a] = -60 / len(valid_movesM)
-                         else:
-                             rewards[s,a] = weights[i][j];
-                     else:
-                        rewards[s,a] = weights[i][j];
-            '''
-            if valid_movesM != None:
-                for valid_move in range(valid_movesM):
-                    i, j = self.statesM[valid_move]
-                    weights[i][j] = -60 / len(valid_movesM)
-            '''
-
-
-
-
-        return rewards;
+            for s in range(self.n_states):                
+                for a in range(self.n_actions):                    
+                    next_s = self.move(s,a)
+                    i,j = self.states[next_s] 
+                    # Simply put the reward as the weights o the next state.
+                    if valid_movesM != None:                                     
+                        if (i,j) in minotaurMoves:
+                            #print('found')
+                            #print(i,j)
+                            #print(minotaurMoves)
+                            #print('')
+                            rewards[s,a] = -60 / len(valid_movesM)                            
+                        else:
+                            rewards[s,a] = weights[i][j]
+                    else:
+                        rewards[s,a] = weights[i][j]  
+            
+        return rewards
 
 
 
