@@ -5,8 +5,8 @@ import numpy as np
 
 def get_policy_and_pathM(env, horizon, start, startM, weights):
 
-    T = horizon;    
-    pathM = []    
+    T = horizon;
+    pathM = []
 
     #Position of player
     state_new = env.map[start]
@@ -20,23 +20,23 @@ def get_policy_and_pathM(env, horizon, start, startM, weights):
         #Control if one step between
         row = env.states[state_new][0]
         col = env.states[state_new][1]
-        
+
         rowM = env.statesM[stateM_new][0]
         colM = env.statesM[stateM_new][1]
 
 
-        pathM.append(env.statesM[stateM_new])  
-        
+        pathM.append(env.statesM[stateM_new])
 
-        stateM_new, valid_movesM =  env.moveM(stateM_new) 
 
-        if (abs(col - colM) + abs(row - rowM)) == 2:          
+        stateM_new, valid_movesM =  env.moveM(stateM_new)
+
+        if (abs(col - colM) + abs(row - rowM)) == 2:
             dangerous_player_pos = state_new
             V, policy = dynamic_programming(env, horizon, weights, valid_movesM, dangerous_player_pos)
         else:
             V, policy = dynamic_programming(env, horizon, weights)
 
-        
+
         if t == 0:
             policy_main = policy[:,t]
         else:
@@ -44,7 +44,7 @@ def get_policy_and_pathM(env, horizon, start, startM, weights):
 
         state_new = env.move(state_new, policy[state_new,t]);
 
- 
+
     return policy_main.T, pathM
 
 
@@ -241,7 +241,7 @@ def animate_solution(maze, path, pathM):
 
 
     # Update the color at each frame
-    for i in range(len(path)):       
+    for i in range(len(path)):
 
         if i > 0:
             #if path[i] == path[i-1]:
@@ -259,11 +259,11 @@ def animate_solution(maze, path, pathM):
 
         grid.get_celld()[(path[i])].set_facecolor(LIGHT_ORANGE)
         grid.get_celld()[(path[i])].get_text().set_text('Player')
-        
-        
+
+
         grid.get_celld()[(pathM[i])].set_facecolor(LIGHT_PURPLE)
         grid.get_celld()[(pathM[i])].get_text().set_text('Minotaur')
-        
+
 
         display.display(fig)
         plt.pause(1)
