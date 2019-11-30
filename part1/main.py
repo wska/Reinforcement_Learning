@@ -5,6 +5,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import time
 from IPython import display
+from plotting import *
+import random
 
 
 
@@ -34,24 +36,50 @@ def main():
     #env.show()
 
  
-    #dead = 0
-    #goal = 0
-    horizon = 22
-    method = 'DynProg';
-    start  = (0, 0);
-    startM = (6, 6);
-    #iterations = 20
+    dead = 0
+    goal = 0
+    #horizon = 22
+    method = 'DynProg'
+    start  = (0, 0)
+    startM = (5, 6)
+    iterations = 2
 
-    for _ in range(1):        
-        policy, pathM = mzf.get_policy_and_pathM(env, horizon, start, startM, weights)
-        path = env.simulate(start, policy, method)
-        mzf.animate_solution(maze, path, pathM)        
-            
+    #horizon = 15
+
+
+    horizon_vector = []
+    survive_vector = []
+    for _ in range(100):
+        #horizon = np.random.geometric(p=1-0.9666, size=1)
+        horizon = random.randrange(0, 21, 1) 
+
+        horizon_vector.append(horizon)
+
+        if horizon < 16:
+            survive_vector.append(0)
+        else:
+            survive_vector.append(1)
+
+  
+    plotResult("Probability surviving given time horizon", "Time Horizon", "Survive", horizon_vector, survive_vector)
     
 
 
-"""
-    for i in range(1, iterations+1): 
+
+
+    """
+    for _ in range(1):
+        horizon = 15       
+        policy, pathM = mzf.get_policy_and_pathM(env, horizon, start, startM, weights)
+        path = env.simulate(start, policy, method)
+        mzf.animate_solution(maze, path, pathM)
+    """
+   
+
+
+
+    """
+    for i in range(1, iterations): 
 
         policy, pathM = mzf.get_policy_and_pathM(env, horizon, start, startM, weights)
 
@@ -67,8 +95,11 @@ def main():
             else:
                 dead += 1
 
-        #mzf.animate_solution(maze, path, pathM)
-"""
+        mzf.animate_solution(maze, path, pathM)
+        print(dead)
+        print(goal)
+    """
+
 
 if __name__ == "__main__":
     main()

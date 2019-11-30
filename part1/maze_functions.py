@@ -32,9 +32,7 @@ def get_policy_and_pathM(env, horizon, start, startM, weights):
         stateM_new, valid_movesM =  env.moveM(stateM_new)        
         
 
-        if (abs(col - colM) + abs(row - rowM)) == 2:
-            if t < 15:
-                print('check!')                
+        if (abs(col - colM) + abs(row - rowM)) == 2:                         
             dangerous_player_pos = state_new       
             V, policy = dynamic_programming(env, horizon, weights, valid_movesM, dangerous_player_pos, t)            
         else:
